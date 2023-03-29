@@ -44,7 +44,7 @@ do
                                 	#리포트생성
                                 	echo ""
                                 	echo ""
-                                	echo 'Kdic1234#1' | sudo -kS ${JAVA_HOME}/bin/java -jar ${JACOCO_HOME}/lib/jacococli.jar report ${REPORT_HOME}/${targetIns}/jacoco-it.exec --classfiles ${classfiles} --sourcefiles ${sourcefiles} --html ${REPORT_HOME}/${targetIns}/${pjtName}/jacoco-report --csv  ${REPORT_HOME}/${targetIns}/${pjtName}/jacoco-report.csv --xml  ${REPORT_HOME}/${targetIns}/${pjtName}/jacoco-report.xml
+                                	echo '{비밀번호}' | sudo -kS ${JAVA_HOME}/bin/java -jar ${JACOCO_HOME}/lib/jacococli.jar report ${REPORT_HOME}/${targetIns}/jacoco-it.exec --classfiles ${classfiles} --sourcefiles ${sourcefiles} --html ${REPORT_HOME}/${targetIns}/${pjtName}/jacoco-report --csv  ${REPORT_HOME}/${targetIns}/${pjtName}/jacoco-report.csv --xml  ${REPORT_HOME}/${targetIns}/${pjtName}/jacoco-report.xml
 
                                 	#ftp에서 다운로드 하기위해 권한변경
                                 	echo 'Kdic1234#1' | sudo -kS chown -Rf {사용자}:{그룹} ${REPORT_HOME}/${targetIns}
