@@ -36,8 +36,8 @@ do
                                 while true
                                 do
                                 	read -p ">>> 소스  프로젝트명을 넣어주세요 : " pjtName
-                                	classfiles="/ci/jenkins/workspace/${jenkinsName}/${pjtName}/target/classes/kdic"
-                                    sourcefiles="/ci/jenkins/workspace/${jenkinsName}/${pjtName}/src/main/java"
+                                	classfiles="/{젠킨스경로}/workspace/${jenkinsName}/${pjtName}/target/classes/kdic"
+                                    sourcefiles="/{젠킨스경로}/workspace/${jenkinsName}/${pjtName}/src/main/java"
 
 									mkdir -p ${REPORT_HOME}/${targetIns}/${pjtName}
 
