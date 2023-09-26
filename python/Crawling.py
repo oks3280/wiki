@@ -37,9 +37,15 @@ def collect_data(url):
         if row_data:
             data_rows.append(row_data)
 
+    # If there is no data, return False to indicate the end of pages
+    if not data_rows:
+        return False
+
     # Print or process data as needed
     for data_row in data_rows:
         print(data_row)
+
+    return True
 
 
 # Define the base URL without the page number
@@ -54,7 +60,12 @@ while True:
     current_url = base_url.format(page_number)
 
     # Collect data from the current page
-    collect_data(current_url)
+    has_data = collect_data(current_url)
+
+    # If there is no data, exit the loop
+    if not has_data:
+        print("더 이상 페이지 없음 - 종료")
+        break
 
     # Increment the page number for the next iteration
     page_number += 1
