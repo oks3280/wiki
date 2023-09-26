@@ -3,6 +3,12 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from lxml import html
 import datetime
+import configparser
+import os
+
+# Load configuration from the properties file
+config = configparser.ConfigParser()
+config.read('./config/config.properties')
 
 # Create a new Chrome driver instance
 options = Options()
@@ -11,7 +17,7 @@ options.add_argument('--headless')
 driver = webdriver.Chrome(options=options)
 
 # Function to collect data from the current page
-def collect_data(url):
+def collect_data(url, table_xpath, row_xpath, cell_xpath):
     # Load the URL
     driver.get(url)
 
@@ -19,16 +25,16 @@ def collect_data(url):
     tree = html.fromstring(driver.page_source)
 
     # Use XPath to locate the table
-    table = tree.xpath('/html/body/div[3]/div[2]/div[2]/div[3]/table[1]/tbody')[0]
+    table = tree.xpath(table_xpath)[0]
 
     # Create an empty list to store the data rows
     data_rows = []
 
     # Iterate through rows and extract data
-    rows = table.xpath('.//tr')
+    rows = table.xpath(row_xpath)
     for row in rows:
         # Extract and store the text content of each cell in the row
-        cells = row.xpath('.//td')
+        cells = row.xpath(cell_xpath)
         row_data = []
         for cell in cells:
             cell_text = cell.text_content().strip()
@@ -39,47 +45,59 @@ def collect_data(url):
 
     return data_rows
 
-# Define the base URL without the page number
-base_url = "https://finance.naver.com/sise/sise_market_sum.naver?sosok=0&page={}"
-
-# Start page number
-page_number = 1
-
 # Get the current date and time
 current_datetime = datetime.datetime.now()
 
-# Extract the year, month, day, hour, minute, and second from the current date and time
-current_year = current_datetime.strftime("%Y")
-current_time = current_datetime.strftime("%H%M%S")
+# Iterate through groups defined in the configuration
+for group in config.sections():
+    if group == 'DEFAULT':
+        continue
 
-# Create a filename with the current year, month, day, and time
-filename = f"./logs/output_{current_year}_{current_time}.txt"
+    # Extract configurations for the current group
+    base_url = config.get(group, 'base_url')
+    table_xpath = config.get(group, 'table_xpath')
+    row_xpath = config.get(group, 'row_xpath')
+    cell_xpath = config.get(group, 'cell_xpath')
+    log_file_creation = config.get(group, 'log_file_creation')
+    log_file_directory = config.get(group, 'log_file_directory')
 
-# Open the file for writing
-with open(filename, "w", encoding="utf-8") as file:
-    # Loop through pages and collect data
-    while True:
-        # Construct the URL for the current page
-        current_url = base_url.format(page_number)
+    # Extract the year, month, day, hour, minute, and second from the current date and time
+    current_year = current_datetime.strftime("%Y")
+    current_time = current_datetime.strftime("%H%M%S")
 
-        # Collect data from the current page
-        data_rows = collect_data(current_url)
+    # Create a filename with the current year, month, day, and time
+    filename = f"output_{current_year}_{current_time}.txt"
 
-        # If there is no data, exit the loop
-        if not data_rows:
-            print("더 이상 페이지 없음 - 종료")
-            break
+    # Open the file for writing if log_file_creation is 'Y'
+    if log_file_creation == 'Y':
+        log_directory = os.path.join(log_file_directory, group)
+        os.makedirs(log_directory, exist_ok=True)
+        log_file_path = os.path.join(log_directory, filename)
+        with open(log_file_path, "w", encoding="utf-8") as file:
+            # Loop through pages and collect data
+            page_number = 1
+            while True:
+                # Construct the URL for the current page
+                current_url = base_url.format(page_number)
 
-        # Print the data
-        for data_row in data_rows:
-            print(data_row)
+                # Collect data from the current page
+                data_rows = collect_data(current_url, table_xpath, row_xpath, cell_xpath)
 
-        # Write the data to the file
-        for data_row in data_rows:
-            file.write("\t".join(data_row) + "\n")
+                # If there is no data, exit the loop
+                if not data_rows:
+                    print(f"더 이상 페이지 없음 ({group}) - 종료")
+                    break
 
-        # Increment the page number for the next iteration
-        page_number += 1
+                # Print the data
+                for data_row in data_rows:
+                    print(data_row)
+
+                # Write the data to the file
+                for data_row in data_rows:
+                    file.write("\t".join(data_row) + "\n")
+
+                # Increment the page number for the next iteration
+                page_number += 1
 
 # Quit the Chrome driver
 driver.quit()
