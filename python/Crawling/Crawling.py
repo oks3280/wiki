@@ -1,21 +1,28 @@
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.service import Service
 from lxml import html
 import datetime
 import configparser
 import os
-import cx_Oracle
+#import cx_Oracle
 
 # Load configuration from the properties file
 config = configparser.ConfigParser()
 config.read('./config/config.properties')
 
-# Create a new Chrome driver instance
-options = Options()
-options.executable_path = ChromeDriverManager().install()
-options.add_argument('--headless')
-driver = webdriver.Chrome(options=options)
+chrome_driver_path = 'D:/works/utils/chrome-win64/chromedriver.exe'  # Change to your actual ChromeDriver path
+portable_chrome_path = 'D:/works/utils/chrome-win64/Chrome.exe'  # Change to your actual Portable Chrome path
+
+chrome_options = webdriver.ChromeOptions()
+chrome_options.binary_location = portable_chrome_path
+chrome_options.add_argument('--headless')
+
+# Create a Service object with the ChromeDriver path
+chrome_service = Service(executable_path=chrome_driver_path)
+
+# Create the Chrome WebDriver instance using the service and options
+driver = webdriver.Chrome(service=chrome_service, options=chrome_options)
+
 
 # Function to collect data from the current page
 def collect_data(url, table_xpath, row_xpath, cell_xpath):
